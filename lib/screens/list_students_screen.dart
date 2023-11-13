@@ -47,6 +47,103 @@ class _ListStudents extends StatelessWidget {
         });
   }
 
+  void showDeleteByIdDialog(Map<String, dynamic>? userData, String? uid) {
+  TextEditingController _documentController = TextEditingController();
+
+  if (userData == null) {
+    print('ERROR: Datos del usuario son nulos.');
+    return;
+  }
+
+  String user = userData['user'] ?? '';
+  String document = userData['document']?.toString() ?? '';
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text('Eliminar por Documento'),
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Ingresa la ID del Estudiante (DOCUMENTO):'),
+            TextField(
+              controller: _documentController,
+              decoration: InputDecoration(hintText: 'Número de Documento'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () async {
+              String enteredDocument = _documentController.text.trim();
+              if (enteredDocument.isNotEmpty) {
+                print('Debug: Documento ingresado: $enteredDocument');
+                print('Debug: Documento del usuario: $document');
+                if (enteredDocument == document) {
+                  print('Debug: Documentos coinciden, eliminando usuario...');
+                  await deletePeople2(user ?? '', uid ?? '');
+                  Navigator.pop(context);
+                  setState(() {});
+                  print('Debug: Usuario eliminado correctamente.');
+
+                  // Muestra una alerta de éxito
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text('Éxito'),
+                        content: Text('Usuario eliminado correctamente.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Aceptar'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                } else {
+                  print('ERROR: El documento ingresado no coincide.');
+
+                  // Muestra una alerta de error
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text('Error'),
+                        content: Text('Los datos ingresados no coinciden.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Aceptar'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
+              }
+            },
+            child: const Text('Eliminar'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
   @override
   Widget build(BuildContext context) {
     StudentsService studentService = Provider.of<StudentsService>(context);
